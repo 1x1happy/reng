@@ -1,0 +1,329 @@
+import { useState } from 'react'
+import './App.css'
+
+const navItems = [
+  { id: 'chat', label: 'Чат с ботом' },
+  { id: 'symptoms', label: 'Проверка симптомов' },
+  { id: 'history', label: 'История' },
+  { id: 'profile', label: 'Профиль здоровья' },
+]
+
+const initialMessages = [
+  {
+    author: 'Флин',
+    text: 'Привет! Я Флин. Опишите, что вас беспокоит, а я помогу понять, с чего начать.',
+    kind: 'assistant',
+  },
+]
+
+function App() {
+  const [page, setPage] = useState('registration')
+  const [message, setMessage] = useState('')
+  const [messages, setMessages] = useState(initialMessages)
+
+  const openChat = () => {
+    setPage('chat')
+  }
+
+  const sendMessage = (event) => {
+    event.preventDefault()
+
+    const trimmedMessage = message.trim()
+
+    if (!trimmedMessage) {
+      return
+    }
+
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      {
+        author: 'Вы',
+        text: trimmedMessage,
+        kind: 'user',
+      },
+      {
+        author: 'Флин',
+        text: 'Спасибо, я записал. Для начала уточните: есть ли температура, боль или другие симптомы?',
+        kind: 'assistant',
+      },
+    ])
+    setMessage('')
+  }
+
+  const renderSidebar = () => (
+    <aside className="sidebar">
+      <div>
+        <p className="eyebrow">Личный кабинет</p>
+        <h2>Флин</h2>
+      </div>
+      <nav className="menu" aria-label="Разделы приложения">
+        {navItems.map((item) => (
+          <button
+            className={page === item.id ? 'active' : ''}
+            type="button"
+            onClick={() => setPage(item.id)}
+            key={item.id}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+      <div className="owl-card">
+        <div className="owl" aria-hidden="true">
+          <span className="owl-eye left"></span>
+          <span className="owl-eye right"></span>
+          <span className="owl-beak"></span>
+        </div>
+        <p>Флин рядом, чтобы спокойно разобрать ситуацию.</p>
+      </div>
+    </aside>
+  )
+
+  const renderInsights = () => (
+    <aside className="insights">
+      <div className="status-card healthy">
+        <p className="eyebrow">Статус</p>
+        <h2>Консультация активна</h2>
+        <p>Диалог и данные профиля сохраняются для следующих консультаций.</p>
+      </div>
+
+      <div className="metric-card">
+        <span>Профиль заполнен</span>
+        <strong>78%</strong>
+        <div className="progress">
+          <span></span>
+        </div>
+      </div>
+    </aside>
+  )
+
+  const renderChat = () => (
+    <section className="chat-panel" id="chat" aria-labelledby="chat-title">
+      <header className="panel-header">
+        <div>
+          <p className="eyebrow">Онлайн-консультация</p>
+          <h2 id="chat-title">Чат с Флином</h2>
+        </div>
+        <button className="icon-button" type="button" onClick={() => setPage('registration')}>
+          Выйти
+        </button>
+      </header>
+
+      <div className="notice-card">
+        <strong>Важно</strong>
+        <p>
+          Ответы помощника не заменяют прием врача. При резком ухудшении самочувствия
+          обратитесь за медицинской помощью.
+        </p>
+      </div>
+
+      <div className="messages">
+        {messages.map((chatMessage, index) => (
+          <article className={`message ${chatMessage.kind}`} key={`${chatMessage.text}-${index}`}>
+            <span>{chatMessage.author}</span>
+            <p>{chatMessage.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <form className="message-form" onSubmit={sendMessage}>
+        <input
+          type="text"
+          placeholder="Напишите сообщение Флину"
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+        />
+        <button type="submit">Отправить</button>
+      </form>
+    </section>
+  )
+
+  const renderSymptoms = () => (
+    <section className="content-panel" aria-labelledby="symptoms-title">
+      <header className="panel-header light">
+        <div>
+          <p className="eyebrow">Проверка симптомов</p>
+          <h2 id="symptoms-title">Расскажите, что беспокоит</h2>
+        </div>
+      </header>
+
+      <div className="symptom-grid">
+        <article className="choice-card active">
+          <span>01</span>
+          <h3>Температура или слабость</h3>
+          <p>Подойдет, если есть простуда, озноб, усталость или ломота.</p>
+        </article>
+        <article className="choice-card">
+          <span>02</span>
+          <h3>Боль</h3>
+          <p>Голова, живот, суставы, спина или другая локальная боль.</p>
+        </article>
+        <article className="choice-card">
+          <span>03</span>
+          <h3>Документы и анализы</h3>
+          <p>Загрузите результат, чтобы Флин помог понять основные показатели.</p>
+        </article>
+      </div>
+
+      <form className="symptom-form">
+        <label>
+          Опишите симптомы
+          <textarea placeholder="Например: температура 37.8, кашель второй день, болит горло"></textarea>
+        </label>
+        <button className="wide-button" type="button" onClick={() => setPage('chat')}>
+          Перейти к чату
+        </button>
+      </form>
+    </section>
+  )
+
+  const renderHistory = () => (
+    <section className="content-panel" aria-labelledby="history-title">
+      <header className="panel-header light">
+        <div>
+          <p className="eyebrow">История</p>
+          <h2 id="history-title">Последние обращения</h2>
+        </div>
+      </header>
+
+      <div className="history-list">
+        <article>
+          <time>Сегодня, 01:48</time>
+          <h3>Первичная консультация</h3>
+          <p>Флин уточнил симптомы и предложил начать с проверки температуры и боли.</p>
+        </article>
+        <article>
+          <time>Вчера, 19:20</time>
+          <h3>Проверка анализов</h3>
+          <p>Добавлены рекомендации по повторной записи и сохранению документов.</p>
+        </article>
+        <article>
+          <time>8 июня, 12:10</time>
+          <h3>Напоминание о подписке</h3>
+          <p>Подписка продлена, история консультаций доступна в профиле.</p>
+        </article>
+      </div>
+    </section>
+  )
+
+  const renderProfile = () => (
+    <section className="content-panel" aria-labelledby="profile-title">
+      <header className="panel-header light">
+        <div>
+          <p className="eyebrow">Профиль здоровья</p>
+          <h2 id="profile-title">Мария</h2>
+        </div>
+      </header>
+
+      <div className="profile-grid">
+        <article>
+          <span>Телефон</span>
+          <strong>+7 (___) ___-__-__</strong>
+        </article>
+        <article>
+          <span>Возраст</span>
+          <strong>Не указан</strong>
+        </article>
+        <article>
+          <span>Аллергии</span>
+          <strong>Нет данных</strong>
+        </article>
+        <article>
+          <span>Подписка</span>
+          <strong>Активна</strong>
+        </article>
+      </div>
+
+      <div className="profile-note">
+        <h3>Что стоит заполнить</h3>
+        <p>Добавьте возраст, хронические заболевания и аллергии, чтобы ответы Флина были точнее.</p>
+      </div>
+    </section>
+  )
+
+  const renderCurrentPage = () => {
+    if (page === 'symptoms') {
+      return renderSymptoms()
+    }
+
+    if (page === 'history') {
+      return renderHistory()
+    }
+
+    if (page === 'profile') {
+      return renderProfile()
+    }
+
+    return renderChat()
+  }
+
+  if (page !== 'registration') {
+    return (
+      <main className="app-shell chat-page">
+        <section className="workspace" aria-label="Рабочая область приложения">
+          {renderSidebar()}
+          {renderCurrentPage()}
+          {renderInsights()}
+        </section>
+      </main>
+    )
+  }
+
+  return (
+    <main className="app-shell registration-page">
+      <section className="hero-section" aria-labelledby="hero-title">
+        <div className="hero-copy">
+          <p className="eyebrow">Регистрация</p>
+          <h1 id="hero-title">Создайте профиль и начните чат с Флином</h1>
+          <p className="hero-text">
+            Введите данные для входа. После нажатия на кнопку получения кода приложение
+            сразу откроет страницу чата с медицинским помощником.
+          </p>
+          <div className="hero-actions">
+            <button className="primary-button" type="button" onClick={openChat}>
+              Получить код
+            </button>
+            <button className="secondary-button" type="button" onClick={openChat}>
+              Уже есть аккаунт
+            </button>
+          </div>
+        </div>
+
+        <form className="login-card" aria-label="Форма регистрации" onSubmit={(event) => event.preventDefault()}>
+          <div className="brand-mark" aria-hidden="true">
+            <span></span>
+          </div>
+          <h2>Регистрация</h2>
+          <label>
+            Имя
+            <input type="text" placeholder="Мария" />
+          </label>
+          <label>
+            Номер телефона
+            <input type="tel" placeholder="+7 (___) ___-__-__" />
+          </label>
+          <label>
+            Пароль
+            <input type="password" placeholder="Введите пароль" />
+          </label>
+          <label>
+            Повторите пароль
+            <input type="password" placeholder="Повторите пароль" />
+          </label>
+          <button className="wide-button" type="button" onClick={openChat}>
+            Получить код
+          </button>
+          <div className="divider">или</div>
+          <button className="social-button" type="button">
+            Регистрация через VK
+          </button>
+          <button className="social-button" type="button">
+            Регистрация через Госуслуги
+          </button>
+        </form>
+      </section>
+    </main>
+  )
+}
+
+export default App
